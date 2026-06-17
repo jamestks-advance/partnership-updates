@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADVANCE.AI — Data Partnership Update Builder</title>
+<script src="https://unpkg.com/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #232740;
+    --border: #2e3350;
+    --text: #e8eaf0;
+    --text-muted: #7c82a0;
+    --ph: #4f8ef7;
+    --ph-bg: #141e3c;
+    --cbi-t: #a78bfa;
+    --cbi-t-bg: #1e1530;
+    --cbi: #c084fc;
+    --cbi-bg: #1c1230;
+    --bps: #34d399;
+    --bps-bg: #0d2620;
+    --accent: #4f8ef7;
+    --yellow: #fbbf24;
+    --red: #f87171;
+  }
+
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* HEADER */
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo { width: 36px; height: 36px; background: linear-gradient(135deg, #4f8ef7, #a78bfa); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; color: white; }
+  .header h1 { font-size: 15px; font-weight: 600; }
+  .header p { font-size: 12px; color: var(--text-muted); }
+  .month-selector { display: flex; align-items: center; gap: 10px; }
+  .month-selector label { font-size: 12px; color: var(--text-muted); }
+  .month-selector input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 12px; border-radius: 6px; font-size: 13px; outline: none; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 4px; padding: 16px 32px 0; border-bottom: 1px solid var(--border); background: var(--surface); overflow-x: auto; }
+  .tab { padding: 8px 16px; border-radius: 6px 6px 0 0; border: 1px solid transparent; border-bottom: none; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-muted); background: transparent; white-space: nowrap; transition: all 0.15s; position: relative; bottom: -1px; }
+  .tab:hover { color: var(--text); background: var(--surface2); }
+  .tab.active { color: var(--text); background: var(--bg); border-color: var(--border); border-bottom-color: var(--bg); }
+  .tab.ph.active { color: var(--ph); }
+  .tab.cbi-t.active { color: var(--cbi-t); }
+  .tab.cbi.active { color: var(--cbi); }
+  .tab.bps.active { color: var(--bps); }
+  .tab.excluded { opacity: 0.35; text-decoration: line-through; pointer-events: none; }
+
+  /* CONTENT */
+  .content { padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .slide-panel { display: none; }
+  .slide-panel.active { display: block; }
+
+  .slide-header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .slide-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+  .badge-ph { background: var(--ph-bg); color: var(--ph); border: 1px solid var(--ph); }
+  .badge-cbi-t { background: var(--cbi-t-bg); color: var(--cbi-t); border: 1px solid var(--cbi-t); }
+  .badge-cbi { background: var(--cbi-bg); color: var(--cbi); border: 1px solid var(--cbi); }
+  .badge-bps { background: var(--bps-bg); color: var(--bps); border: 1px solid var(--bps); }
+  .slide-header h2 { font-size: 18px; font-weight: 700; }
+
+  .segment { margin-bottom: 28px; }
+  .segment-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .segment-name-input {
+    flex: 1; background: transparent; border: none; color: var(--text-muted);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: inherit; outline: none; padding: 2px 4px; border-radius: 4px; min-width: 0;
+    transition: background 0.15s;
+  }
+  .segment-name-input:hover { background: var(--surface2); }
+  .segment-name-input:focus { background: var(--surface2); color: var(--text); }
+  .remove-segment-btn {
+    width: 20px; height: 20px; border-radius: 4px; background: transparent;
+    border: 1px solid transparent; color: var(--text-muted); font-size: 13px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: all 0.15s; line-height: 1;
+  }
+  .remove-segment-btn:hover { background: #2e1515; border-color: var(--red); color: var(--red); }
+  .add-segment-btn {
+    width: 100%; padding: 8px; border: 1px dashed var(--border); border-radius: 8px;
+    background: transparent; color: var(--text-muted); font-size: 12px; font-family: inherit;
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: center;
+    justify-content: center; gap: 6px; margin-bottom: 24px;
+  }
+  .add-segment-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--ph-bg); }
+  .add-segment-btn.ph-seg:hover { }
+  .add-segment-btn.cbi-t-seg:hover { border-color: var(--cbi-t); color: var(--cbi-t); background: var(--cbi-t-bg); }
+  .add-segment-btn.cbi-seg:hover { border-color: var(--cbi); color: var(--cbi); background: var(--cbi-bg); }
+  .add-segment-btn.bps-seg:hover { border-color: var(--bps); color: var(--bps); background: var(--bps-bg); }
+
+  /* PARTNER CARD */
+  .partner-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; margin-bottom: 12px; position: relative; }
+  .partner-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .ph-card .dot { background: var(--ph); }
+  .cbi-t-card .dot { background: var(--cbi-t); }
+  .cbi-card .dot { background: var(--cbi); }
+  .bps-card .dot { background: var(--bps); }
+
+  /* Editable partner name */
+  .partner-name-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid transparent;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    outline: none;
+    padding: 2px 4px;
+    transition: border-color 0.15s;
+    min-width: 0;
+  }
+  .partner-name-input:hover { border-bottom-color: var(--border); }
+  .partner-name-input:focus { border-bottom-color: var(--accent); }
+
+  .remove-btn {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .remove-btn:hover { background: #2e1515; border-color: var(--red); color: var(--red); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .field-row { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+  .field label .prev-badge { background: #2e3350; color: #7c82a0; border-radius: 4px; padding: 1px 5px; font-size: 10px; margin-left: 4px; }
+  .field label .update-badge { background: #1a2e20; color: #34d399; border-radius: 4px; padding: 1px 5px; font-size: 10px; margin-left: 4px; }
+  .field textarea { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 13px; line-height: 1.6; padding: 10px 12px; resize: vertical; min-height: 80px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .field textarea:focus { border-color: var(--accent); }
+  .field textarea::placeholder { color: #454a65; }
+
+  /* ongoing-row removed */
+
+  /* ADD PARTNER BUTTON */
+  .add-partner-btn {
+    width: 100%;
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .add-partner-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--ph-bg); }
+  .add-partner-btn.cbi-t-add:hover { background: var(--cbi-t-bg); border-color: var(--cbi-t); color: var(--cbi-t); }
+  .add-partner-btn.cbi-add:hover { background: var(--cbi-bg); border-color: var(--cbi); color: var(--cbi); }
+  .add-partner-btn.bps-add:hover { background: var(--bps-bg); border-color: var(--bps); color: var(--bps); }
+
+  /* NEXT STEPS */
+  .next-steps-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .next-steps-section h3 { font-size: 12px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--yellow); margin-bottom: 14px; }
+  .next-step-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .next-step-label { font-size: 12px; font-weight: 600; color: var(--text-muted); min-width: 130px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .next-step-row input[type=text] { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-size: 13px; padding: 7px 10px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .next-step-row input[type=text]:focus { border-color: var(--yellow); }
+  .next-step-row input[type=text]::placeholder { color: #454a65; }
+
+  /* COVER SLIDE */
+  .cover-preview { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 24px; }
+  .cover-preview .subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+  .cover-preview .title { font-size: 22px; font-weight: 800; }
+  .cover-preview .month-tag { display: inline-block; background: linear-gradient(135deg, #4f8ef7, #a78bfa); padding: 3px 16px; border-radius: 20px; font-size: 14px; font-weight: 700; margin: 8px 0; }
+  .cover-preview .author { font-size: 13px; color: var(--text-muted); margin-top: 16px; }
+  .cover-preview .author strong { color: var(--text); }
+
+  /* SLIDE TOGGLES */
+  .slide-toggles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 600px) { .slide-toggles { grid-template-columns: 1fr; } }
+  .slide-toggle {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .slide-toggle:hover { border-color: var(--accent); }
+  .slide-toggle.excluded { opacity: 0.45; }
+  .slide-toggle input[type=checkbox] { display: none; }
+  .toggle-pill {
+    width: 36px; height: 20px;
+    border-radius: 10px;
+    background: var(--border);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .toggle-pill::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+  }
+  .slide-toggle.on .toggle-pill { background: var(--accent); }
+  .slide-toggle.on .toggle-pill::after { transform: translateX(16px); }
+  .slide-toggle.ph-toggle.on .toggle-pill { background: var(--ph); }
+  .slide-toggle.cbi-t-toggle.on .toggle-pill { background: var(--cbi-t); }
+  .slide-toggle.cbi-toggle.on .toggle-pill { background: var(--cbi); }
+  .slide-toggle.bps-toggle.on .toggle-pill { background: var(--bps); }
+  .toggle-info { flex: 1; }
+  .toggle-info .toggle-label { font-size: 13px; font-weight: 600; }
+  .toggle-info .toggle-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* COVER EDIT FIELDS */
+  .cover-edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 600px) { .cover-edit-grid { grid-template-columns: 1fr; } }
+  .cover-field { display: flex; flex-direction: column; gap: 6px; }
+  .cover-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
+  .cover-field input[type=text] { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: 13px; padding: 9px 12px; font-family: inherit; outline: none; transition: border-color 0.15s; }
+  .cover-field input[type=text]:focus { border-color: var(--accent); }
+
+  /* EXPORT BAR */
+  .export-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; gap: 12px; z-index: 99; }
+  .export-bar p { font-size: 12px; color: var(--text-muted); }
+  .export-bar .btns { display: flex; gap: 8px; }
+
+  .btn { padding: 8px 18px; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: linear-gradient(135deg, #4f8ef7, #a78bfa); color: white; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 700px; width: 90%; max-height: 80vh; display: flex; flex-direction: column; gap: 16px; }
+  .modal h3 { font-size: 16px; font-weight: 700; }
+  .modal p { font-size: 12px; color: var(--text-muted); }
+  .modal textarea { flex: 1; min-height: 300px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; font-family: 'Menlo', 'Monaco', monospace; padding: 14px; resize: none; outline: none; line-height: 1.6; }
+  .modal .modal-btns { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-close { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #34d399; color: #0a1f14; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 300; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* HISTORY MODAL */
+  .history-modal { max-width: 640px; }
+  .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 200px; max-height: 420px; }
+  .history-empty { display: flex; align-items: center; justify-content: center; height: 120px; color: var(--text-muted); font-size: 13px; }
+  .history-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.15s;
+  }
+  .history-item:hover { border-color: var(--accent); }
+  .history-item-info { flex: 1; min-width: 0; }
+  .history-item-author { font-size: 13px; font-weight: 600; }
+  .history-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .history-item-slides { display: flex; gap: 5px; margin-top: 7px; flex-wrap: wrap; }
+  .slide-pill {
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 10px; border: 1px solid;
+  }
+  .pill-ph { background: var(--ph-bg); color: var(--ph); border-color: var(--ph); }
+  .pill-cbi-t { background: var(--cbi-t-bg); color: var(--cbi-t); border-color: var(--cbi-t); }
+  .pill-cbi { background: var(--cbi-bg); color: var(--cbi); border-color: var(--cbi); }
+  .pill-bps { background: var(--bps-bg); color: var(--bps); border-color: var(--bps); }
+  .history-item-btns { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-restore { background: var(--accent); color: white; padding: 6px 14px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; font-family: inherit; transition: opacity 0.15s; }
+  .btn-restore:hover { opacity: 0.85; }
+  .btn-del { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .btn-del:hover { border-color: var(--red); color: var(--red); background: #2e1515; }
+
+  .spacer { height: 80px; }
+  /* GENERATE BUTTON */
+  .btn-generate {
+    background: linear-gradient(135deg, #34d399, #4f8ef7);
+    color: #0a1f14;
+    font-weight: 700;
+    position: relative;
+  }
+  .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .generate-area { display: flex; flex-direction: column; gap: 8px; }
+  .generate-warning { font-size: 11px; color: var(--text-muted); text-align: right; }
+  .generate-status { font-size: 12px; min-height: 18px; text-align: right; transition: color 0.2s; }
+  .generate-status.loading { color: var(--accent); }
+  .generate-status.success { color: var(--bps); }
+  .generate-status.error { color: var(--red); }
+
+  .spinner { display: inline-block; animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-left">
+    <div class="logo">AI</div>
+    <div>
+      <h1>Data Partnership Update Builder</h1>
+      <p>ADVANCE.AI · Regional Data Partnerships</p>
+    </div>
+  </div>
+  <div class="month-selector">
+    <label>Month</label>
+    <input type="month" id="monthInput">
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('cover', this)">📋 Cover</button>
+  <button class="tab ph" onclick="switchTab('ph', this)">🇵🇭 PH Partnership</button>
+  <button class="tab cbi-t" onclick="switchTab('cbi-telco', this)">📡 CBI — Telco Score</button>
+  <button class="tab cbi" onclick="switchTab('cbi', this)">🏛️ CBI Partnership</button>
+  <button class="tab bps" onclick="switchTab('bps', this)">⚡ BPS Partnership</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- COVER -->
+  <div class="slide-panel active" id="panel-cover">
+    <div class="slide-header">
+      <span class="slide-badge" style="background:#1a1d2e;color:#7c82a0;border:1px solid #2e3350;">Slide 1</span>
+      <h2>Cover Slide</h2>
+    </div>
+
+    <div class="cover-preview">
+      <div class="subtitle">Updated as of <span id="previewDate">—</span></div>
+      <div class="title" id="previewCompany">ADVANCE.AI</div>
+      <div class="title" id="previewTitleLine">Data Partnership</div>
+      <div class="month-tag" id="previewMonth">Month</div>
+      <div class="title">Strategy Review</div>
+      <div class="author" style="margin-top:16px;">Shared by <strong id="previewName">James Teh</strong><br><span id="previewRole">Senior Manager, Regional Data Partnerships</span></div>
+    </div>
+
+    <div class="partner-card" style="background:var(--surface2);border-color:var(--border);margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:14px;">Included Slides</div>
+      <div class="slide-toggles">
+        <label class="slide-toggle ph-toggle on" id="toggle-ph" onclick="toggleSlide('ph', this)">
+          <input type="checkbox" checked>
+          <div class="toggle-pill"></div>
+          <div class="toggle-info">
+            <div class="toggle-label">🇵🇭 PH Partnership</div>
+            <div class="toggle-sub">Slide 2 — Philippines</div>
+          </div>
+        </label>
+        <label class="slide-toggle cbi-t-toggle on" id="toggle-cbi-t" onclick="toggleSlide('cbi-t', this)">
+          <input type="checkbox" checked>
+          <div class="toggle-pill"></div>
+          <div class="toggle-info">
+            <div class="toggle-label">📡 CBI — Telco Score</div>
+            <div class="toggle-sub">Slide 3 — Indonesia CBI</div>
+          </div>
+        </label>
+        <label class="slide-toggle cbi-toggle on" id="toggle-cbi" onclick="toggleSlide('cbi', this)">
+          <input type="checkbox" checked>
+          <div class="toggle-pill"></div>
+          <div class="toggle-info">
+            <div class="toggle-label">🏛️ CBI Partnership</div>
+            <div class="toggle-sub">Slide 4 — Indonesia CBI</div>
+          </div>
+        </label>
+        <label class="slide-toggle bps-toggle on" id="toggle-bps" onclick="toggleSlide('bps', this)">
+          <input type="checkbox" checked>
+          <div class="toggle-pill"></div>
+          <div class="toggle-info">
+            <div class="toggle-label">⚡ BPS Partnership</div>
+            <div class="toggle-sub">Slide 5 — BPS Products</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <div class="partner-card" style="background:var(--surface2);border-color:var(--border);">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:14px;">Edit Cover Details</div>
+      <div class="cover-edit-grid">
+        <div class="cover-field">
+          <label>Company Name</label>
+          <input type="text" id="coverCompany" value="ADVANCE.AI" oninput="updateCoverPreview()">
+        </div>
+        <div class="cover-field">
+          <label>Report Title</label>
+          <input type="text" id="coverTitle" value="Data Partnership" oninput="updateCoverPreview()">
+        </div>
+        <div class="cover-field">
+          <label>Author Name</label>
+          <input type="text" id="coverName" value="James Teh" oninput="updateCoverPreview()">
+        </div>
+        <div class="cover-field">
+          <label>Author Role</label>
+          <input type="text" id="coverRole" value="Senior Manager, Regional Data Partnerships" oninput="updateCoverPreview()">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PH PARTNERSHIP UPDATE -->
+  <div class="slide-panel" id="panel-ph">
+    <div class="slide-header">
+      <span class="slide-badge badge-ph">Slide 2</span>
+      <h2>PH Partnership Update</h2>
+    </div>
+    <div id="segments-ph"></div>
+    <button class="add-segment-btn ph-seg" onclick="addSegment('ph')">+ Add Section</button>
+    <div class="segment">
+      <div class="segment-header"><span class="segment-name-input" style="pointer-events:none;">⟶ Next Steps</span></div>
+      <div class="next-steps-section">
+        <h3>Next Steps</h3>
+        <div id="ph-next-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CBI TELCO SCORE -->
+  <div class="slide-panel" id="panel-cbi-telco">
+    <div class="slide-header">
+      <span class="slide-badge badge-cbi-t">Slide 3</span>
+      <h2>CBI Partnership Update — Telco Score</h2>
+    </div>
+    <div id="segments-cbi-t"></div>
+    <button class="add-segment-btn cbi-t-seg" onclick="addSegment('cbi-t')">+ Add Section</button>
+    <div class="segment">
+      <div class="segment-header"><span class="segment-name-input" style="pointer-events:none;">⟶ Next Steps</span></div>
+      <div class="next-steps-section">
+        <h3>Next Steps</h3>
+        <div id="cbi-t-next-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CBI PARTNERSHIP -->
+  <div class="slide-panel" id="panel-cbi">
+    <div class="slide-header">
+      <span class="slide-badge badge-cbi">Slide 4</span>
+      <h2>CBI Partnership Update</h2>
+    </div>
+    <div id="segments-cbi"></div>
+    <button class="add-segment-btn cbi-seg" onclick="addSegment('cbi')">+ Add Section</button>
+    <div class="segment">
+      <div class="segment-header"><span class="segment-name-input" style="pointer-events:none;">⟶ Next Steps</span></div>
+      <div class="next-steps-section">
+        <h3>Next Steps</h3>
+        <div id="cbi-next-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BPS PARTNERSHIP -->
+  <div class="slide-panel" id="panel-bps">
+    <div class="slide-header">
+      <span class="slide-badge badge-bps">Slide 5</span>
+      <h2>BPS Partnership Update</h2>
+    </div>
+    <div id="segments-bps"></div>
+    <button class="add-segment-btn bps-seg" onclick="addSegment('bps')">+ Add Section</button>
+    <div class="segment">
+      <div class="segment-header"><span class="segment-name-input" style="pointer-events:none;">⟶ Next Steps</span></div>
+      <div class="next-steps-section">
+        <h3>Next Steps</h3>
+        <div id="bps-next-steps"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<!-- EXPORT BAR -->
+<div class="export-bar">
+  <p>Fill in updates across all 5 slides, then export.</p>
+  <div class="btns">
+    <button class="btn btn-secondary" onclick="openHistory()">🕓 History</button>
+    <button class="btn btn-secondary" onclick="openExport('json')">💾 Export JSON</button>
+    <button class="btn btn-primary" onclick="openExport('prompt')">🚀 Copy Claude Prompt</button>
+  </div>
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal history-modal">
+    <h3>🕓 Saved Copies</h3>
+    <p>Auto-saved each time you copy the Claude prompt. Click Restore to load a previous state.</p>
+    <div class="history-list" id="historyList"></div>
+    <div class="modal-btns">
+      <button class="btn btn-close btn" onclick="closeHistory()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h3 id="modalTitle">Export</h3>
+    <p id="modalDesc"></p>
+    <textarea id="exportText" readonly></textarea>
+    <div class="generate-area" id="generateArea" style="display:none">
+      <div class="modal-btns" style="justify-content:flex-end">
+        <div id="generateStatus" class="generate-status"></div>
+        <button class="btn btn-generate" id="generateBtn" onclick="generateDeck()">⚡ Generate Deck</button>
+      </div>
+      <div class="generate-warning">⚠️ Calls Claude API — consumes tokens</div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-close btn" onclick="closeModal()">Close</button>
+      <button class="btn btn-primary" onclick="copyExport()">📋 Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── INITIAL DATA ─────────────────────────────────────────────────────────────
+// Segment-name–based schema: slides → array of { name, partners[] }
+const SLIDE_DEFS = {
+  ph: [
+    { name: 'Collection Signals',         partners: ['Lenderlink', 'Dragonpay'] },
+    { name: 'Telco Score',                partners: ['Kayana', 'GCash (Atome/Telco POC)'] },
+    { name: 'SME / D2C',                  partners: ['Unified Intelligence (OTP-less Auth)', 'GCash (SME/KYB, D2C/SkorKo, SSO)'] },
+  ],
+  'cbi-t': [
+    { name: 'Telco Partners',             partners: ['Telkomsel', 'IOH (Indosat)', 'XL'] },
+  ],
+  cbi: [
+    { name: 'Income Prediction',          partners: ['Monnai'] },
+    { name: 'Debtor Insight',             partners: ['Atlasat (Phone Call History)', 'GTech & Atlasat', 'Igloo Insurtech'] },
+    { name: 'SME Bureau',                 partners: ['Ginee', 'Finnet'] },
+  ],
+  bps: [
+    { name: 'Phone Number Tenure Check',  partners: ['Atlasat'] },
+    { name: 'Address Verification (Direct to Telco)', partners: ['Indosat', 'Noxintel'] },
+    { name: 'Composite Credit Score (Payment Gateway)', partners: ['SprintAsia', 'DOKU', 'CashUp/Cashlez'] },
+    { name: 'Income Validation',          partners: ['BPJS TK'] },
+  ],
+};
+
+const NS_MAP = { ph: 'ph-next-steps', 'cbi-t': 'cbi-t-next-steps', cbi: 'cbi-next-steps', bps: 'bps-next-steps' };
+
+let pidCounter = 0;
+function newPid() { return 'pid-' + (++pidCounter); }
+
+// ─── CREATE PARTNER CARD ─────────────────────────────────────────────────────
+function createCard(slideKey, containerEl, nsContainerId, partnerName, initialData = {}) {
+  const pid = newPid();
+
+  const card = document.createElement('div');
+  card.className = `partner-card ${slideKey}-card`;
+  card.dataset.pid = pid;
+
+  card.innerHTML = `
+    <div class="partner-card-header">
+      <span class="dot"></span>
+      <input type="text" class="partner-name-input" value="${partnerName}" placeholder="Partner name…"
+        oninput="syncNsLabel('${pid}', this.value)">
+      <button class="remove-btn" title="Remove partner" onclick="removePartner('${pid}', '${nsContainerId}')">×</button>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Prev <span class="prev-badge">prior month</span></label>
+        <textarea id="prev-${pid}" placeholder="Prior month status — 1–2 lines…"></textarea>
+      </div>
+      <div class="field">
+        <label>Update <span class="update-badge">this month</span></label>
+        <textarea id="upd-${pid}" placeholder="Current update — concise bullets…"></textarea>
+      </div>
+    </div>
+  `;
+
+  containerEl.appendChild(card);
+
+  // Populate initial values if restoring
+  if (initialData.prev) document.getElementById(`prev-${pid}`).value = initialData.prev;
+  if (initialData.update) document.getElementById(`upd-${pid}`).value = initialData.update;
+
+  // Next step row
+  const nsContainer = document.getElementById(nsContainerId);
+  if (nsContainer) {
+    const row = document.createElement('div');
+    row.className = 'next-step-row';
+    row.dataset.pid = pid;
+    row.innerHTML = `
+      <span class="next-step-label" id="nslabel-${pid}">${partnerName.split('(')[0].trim()}</span>
+      <input type="text" id="ns-${pid}" placeholder="Action item…">
+    `;
+    nsContainer.appendChild(row);
+    if (initialData.nextStep) document.getElementById(`ns-${pid}`).value = initialData.nextStep;
+  }
+}
+
+// ─── ADD PARTNER (interactive) ────────────────────────────────────────────────
+function addPartner(slideKey, containerId, nsContainerId) {
+  const name = prompt('Partner name:');
+  if (!name || !name.trim()) return;
+  const containerEl = document.getElementById(containerId);
+  createCard(slideKey, containerEl, nsContainerId, name.trim());
+}
+
+// ─── SEGMENT MANAGEMENT ───────────────────────────────────────────────────────
+let segCounter = 0;
+function newSegId() { return 'seg-' + (++segCounter); }
+
+function createSegment(slideKey, segmentName, partnersToAdd = []) {
+  const segId = newSegId();
+  const listId = `list-${segId}`;
+  const nsId = NS_MAP[slideKey];
+  const slideClass = slideKey.replace('-', '-') + '-add';
+  const addClass = slideKey === 'cbi-t' ? 'cbi-t-add' : slideKey === 'cbi' ? 'cbi-add' : slideKey === 'bps' ? 'bps-add' : '';
+
+  const container = document.getElementById(`segments-${slideKey}`);
+  if (!container) return;
+
+  const seg = document.createElement('div');
+  seg.className = 'segment';
+  seg.dataset.segId = segId;
+  seg.innerHTML = `
+    <div class="segment-header">
+      <input type="text" class="segment-name-input" value="${segmentName}" placeholder="Section name…">
+      <button class="remove-segment-btn" title="Remove section" onclick="removeSegment(this.closest('.segment'), '${nsId}')">×</button>
+    </div>
+    <div class="partner-list" id="${listId}"></div>
+    <button class="add-partner-btn ${addClass}" onclick="addPartner('${slideKey}', '${listId}', '${nsId}')">+ Add Partner</button>
+  `;
+  container.appendChild(seg);
+
+  // Add default/restored partners
+  const listEl = document.getElementById(listId);
+  partnersToAdd.forEach(p => {
+    if (typeof p === 'string') createCard(slideKey, listEl, nsId, p);
+    else createCard(slideKey, listEl, nsId, p.name || '', p);
+  });
+}
+
+function addSegment(slideKey) {
+  const name = prompt('Section name (e.g. "Phone Number Tenure Check"):');
+  if (!name || !name.trim()) return;
+  createSegment(slideKey, name.trim());
+}
+
+function removeSegment(segEl, nsId) {
+  if (!confirm('Remove this section and all its partners?')) return;
+  // Remove next-step rows for all partners in this segment
+  segEl.querySelectorAll('.partner-card').forEach(card => {
+    const pid = card.dataset.pid;
+    const nsRow = document.querySelector(`#${nsId} .next-step-row[data-pid="${pid}"]`);
+    if (nsRow) nsRow.remove();
+  });
+  segEl.remove();
+}
+
+// ─── REMOVE PARTNER ───────────────────────────────────────────────────────────
+function removePartner(pid, nsContainerId) {
+  const card = document.querySelector(`[data-pid="${pid}"].partner-card`);
+  if (card) card.remove();
+  const nsRow = document.querySelector(`#${nsContainerId} [data-pid="${pid}"]`);
+  if (nsRow) nsRow.remove();
+}
+
+// ─── SYNC NS LABEL ────────────────────────────────────────────────────────────
+function syncNsLabel(pid, value) {
+  const el = document.getElementById(`nslabel-${pid}`);
+  if (el) el.textContent = value.split('(')[0].trim() || '—';
+}
+
+// ─── BUILD INITIAL SEGMENTS ───────────────────────────────────────────────────
+for (const [slideKey, segments] of Object.entries(SLIDE_DEFS)) {
+  segments.forEach(seg => createSegment(slideKey, seg.name, seg.partners));
+}
+
+// ─── SLIDE SELECTION ─────────────────────────────────────────────────────────
+const TAB_MAP = { ph: 1, 'cbi-t': 2, cbi: 3, bps: 4 }; // tab index (0=cover)
+
+function toggleSlide(slideKey, labelEl) {
+  event.preventDefault();
+  const checkbox = labelEl.querySelector('input[type=checkbox]');
+  checkbox.checked = !checkbox.checked;
+  const on = checkbox.checked;
+  labelEl.classList.toggle('on', on);
+  labelEl.classList.toggle('excluded', !on);
+
+  // Grey out the corresponding tab
+  const tabEl = document.querySelectorAll('.tab')[TAB_MAP[slideKey]];
+  if (tabEl) tabEl.classList.toggle('excluded', !on);
+}
+
+function isIncluded(slideKey) {
+  const toggle = document.getElementById(`toggle-${slideKey}`);
+  return toggle?.querySelector('input[type=checkbox]')?.checked ?? true;
+}
+
+// ─── MONTH / COVER ────────────────────────────────────────────────────────────
+const monthInput = document.getElementById('monthInput');
+const now = new Date();
+monthInput.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+function updateCoverPreview() {
+  const val = monthInput.value;
+  if (val) {
+    const d = new Date(val + '-01');
+    const month = d.toLocaleString('en-US', { month: 'long' });
+    const year = d.getFullYear();
+    document.getElementById('previewDate').textContent = `${month} ${year}`;
+    document.getElementById('previewMonth').textContent = month;
+  }
+  document.getElementById('previewCompany').textContent = document.getElementById('coverCompany').value || 'ADVANCE.AI';
+  document.getElementById('previewTitleLine').textContent = document.getElementById('coverTitle').value || 'Data Partnership';
+  document.getElementById('previewName').textContent = document.getElementById('coverName').value || 'James Teh';
+  document.getElementById('previewRole').textContent = document.getElementById('coverRole').value || 'Senior Manager, Regional Data Partnerships';
+}
+monthInput.addEventListener('input', updateCoverPreview);
+updateCoverPreview();
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(panelId, btn) {
+  document.querySelectorAll('.slide-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`panel-${panelId}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─── COLLECT ALL DATA ─────────────────────────────────────────────────────────
+function collectData() {
+  const val = monthInput.value;
+  const d = val ? new Date(val + '-01') : new Date();
+  const month = d.toLocaleString('en-US', { month: 'long' });
+  const year = d.getFullYear();
+
+  const cover = {
+    company: document.getElementById('coverCompany').value.trim(),
+    title: document.getElementById('coverTitle').value.trim(),
+    authorName: document.getElementById('coverName').value.trim(),
+    authorRole: document.getElementById('coverRole').value.trim(),
+    month, year,
+    monthValue: monthInput.value
+  };
+
+  // Collect segments and partners from DOM (fully dynamic)
+  const slides = {};
+  for (const slideKey of ['ph', 'cbi-t', 'cbi', 'bps']) {
+    const container = document.getElementById(`segments-${slideKey}`);
+    if (!container) { slides[slideKey] = []; continue; }
+    slides[slideKey] = Array.from(container.querySelectorAll('.segment')).map(segEl => {
+      const segName = segEl.querySelector('.segment-name-input')?.value.trim() || '';
+      const partners = Array.from(segEl.querySelectorAll('.partner-card')).map(card => {
+        const pid = card.dataset.pid;
+        return {
+          name: card.querySelector('.partner-name-input')?.value.trim() || '',
+          prev: document.getElementById(`prev-${pid}`)?.value.trim() || '',
+          update: document.getElementById(`upd-${pid}`)?.value.trim() || '',
+          nextStep: document.getElementById(`ns-${pid}`)?.value.trim() || '',
+        };
+      });
+      return { name: segName, partners };
+    });
+  }
+
+  const included = { ph: isIncluded('ph'), 'cbi-t': isIncluded('cbi-t'), cbi: isIncluded('cbi'), bps: isIncluded('bps') };
+  return { cover, included, slides };
+}
+
+// ─── BUILD CLAUDE PROMPT ──────────────────────────────────────────────────────
+const SLIDE_LABELS = {
+  ph:     'SLIDE 2 — PH PARTNERSHIP UPDATE',
+  'cbi-t':'SLIDE 3 — CBI PARTNERSHIP UPDATE — TELCO SCORE',
+  cbi:    'SLIDE 4 — CBI PARTNERSHIP UPDATE',
+  bps:    'SLIDE 5 — BPS PARTNERSHIP UPDATE',
+};
+
+function buildPrompt(data) {
+  const { cover, slides } = data;
+  let out = `Please create the ${cover.company} ${cover.title} ${cover.month} ${cover.year} Strategy Review deck using the data-partnership-deck skill.\n\n`;
+  out += `**Cover:** ${cover.company}: ${cover.title} ${cover.month} Strategy Review\n`;
+  out += `**Updated as of:** ${cover.month} ${cover.year}\n`;
+  out += `**Shared by:** ${cover.authorName}, ${cover.authorRole}\n\n---\n\n`;
+
+  for (const [slideKey, segments] of Object.entries(slides)) {
+    if (!isIncluded(slideKey)) continue;
+    out += `## ${SLIDE_LABELS[slideKey]}\n\n`;
+    // segments is now an array of { name, partners[] }
+    for (const seg of segments) {
+      if (!seg.partners.length) continue;
+      out += `### ${seg.name}\n\n`;
+      const nextSteps = [];
+      seg.partners.forEach(p => {
+        out += `**${p.name}**\n`;
+        out += `Prev: ${p.prev || '(no update provided)'}\n`;
+        out += `Update: ${p.update || '(no update provided)'}\n\n`;
+        if (p.nextStep) nextSteps.push(`- ${p.name.split('(')[0].trim()}: ${p.nextStep}`);
+      });
+      if (nextSteps.length) out += `**Next Steps:**\n${nextSteps.join('\n')}\n`;
+      out += '\n';
+    }
+    out += '---\n\n';
+  }
+
+  out += `**Editorial rules to follow:**\n`;
+  out += `- Indonesia credit bureau slides = "CBI Partnership Update" (never "ID")\n`;
+  out += `- Keep BPS and CBI strictly separate\n`;
+  out += `- GCash Geo Location = Address Verification (not reselling)\n`;
+  out += `- Flag any cost/financial figures for verification\n`;
+  out += `- Use Prev/Update format per partner entry\n`;
+  return out;
+}
+
+// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
+const SB_URL    = 'https://abxcfllvfuoasizuvpft.supabase.co';
+const SB_KEY    = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFieGNmbGx2ZnVvYXNpenV2cGZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1NzMzOTYsImV4cCI6MjA5NzE0OTM5Nn0.dk89iQCXzYswbOi1pkginkZjfQwA3SF7FRrKVHRdfNU';
+const SB_TABLE  = 'partnership_history';
+
+function sbHeaders() {
+  return { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+}
+
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+async function saveToHistory(data) {
+  const body = {
+    author_name: data.cover.authorName || 'Unknown',
+    included: data.included,
+    data
+  };
+  const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}`, {
+    method: 'POST', headers: sbHeaders(), body: JSON.stringify(body)
+  });
+  if (!res.ok) console.error('Save failed', await res.text());
+
+  // Enforce max 50: delete oldest beyond 50
+  const all = await loadHistory();
+  if (all.length > 50) {
+    const toDelete = all.slice(50).map(e => e.id);
+    await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?id=in.(${toDelete.join(',')})`, {
+      method: 'DELETE', headers: sbHeaders()
+    });
+  }
+}
+
+async function loadHistory() {
+  const res = await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?order=saved_at.desc&limit=50`, {
+    headers: sbHeaders()
+  });
+  if (!res.ok) return [];
+  const rows = await res.json();
+  // Normalise to the shape the rest of the code expects
+  return rows.map(r => ({
+    id: r.id,
+    savedAt: r.saved_at,
+    authorName: r.author_name,
+    included: r.included,
+    data: r.data
+  }));
+}
+
+async function deleteHistoryEntry(id) {
+  await fetch(`${SB_URL}/rest/v1/${SB_TABLE}?id=eq.${id}`, {
+    method: 'DELETE', headers: sbHeaders()
+  });
+  await renderHistory();
+}
+
+const SLIDE_PILL_CONFIG = {
+  ph:     { label: 'PH',        cls: 'pill-ph' },
+  'cbi-t':{ label: 'CBI Telco', cls: 'pill-cbi-t' },
+  cbi:    { label: 'CBI',       cls: 'pill-cbi' },
+  bps:    { label: 'BPS',       cls: 'pill-bps' },
+};
+
+async function renderHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="history-empty">Loading…</div>';
+  const history = await loadHistory();
+  if (!history.length) {
+    list.innerHTML = '<div class="history-empty">No saved copies yet. Copy a Claude prompt to create one.</div>';
+    return;
+  }
+  list.innerHTML = history.map(entry => {
+    const d = new Date(entry.savedAt);
+    const dateStr = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    const timeStr = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const pills = Object.entries(entry.included || {})
+      .filter(([, v]) => v)
+      .map(([k]) => `<span class="slide-pill ${SLIDE_PILL_CONFIG[k]?.cls}">${SLIDE_PILL_CONFIG[k]?.label}</span>`)
+      .join('');
+    const deckMonth = entry.data?.cover?.month || '';
+    const deckYear = entry.data?.cover?.year || '';
+    return `
+      <div class="history-item">
+        <div class="history-item-info">
+          <div class="history-item-author">${entry.authorName} &mdash; ${deckMonth} ${deckYear}</div>
+          <div class="history-item-date">Saved ${dateStr} at ${timeStr}</div>
+          <div class="history-item-slides">${pills}</div>
+        </div>
+        <div class="history-item-btns">
+          <button class="btn-restore" onclick="restoreState(${entry.id})">Restore</button>
+          <button class="btn-del" onclick="deleteHistoryEntry(${entry.id})" title="Delete">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function openHistory() {
+  document.getElementById('historyModal').classList.add('open');
+  await renderHistory();
+}
+function closeHistory() { document.getElementById('historyModal').classList.remove('open'); }
+document.getElementById('historyModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeHistory(); });
+
+async function restoreState(id) {
+  const history = await loadHistory();
+  const entry = history.find(e => e.id === id);
+  if (!entry) return;
+  const { cover, included, slides } = entry.data;
+
+  // Restore month
+  if (cover.monthValue) monthInput.value = cover.monthValue;
+
+  // Restore cover fields
+  document.getElementById('coverCompany').value = cover.company || '';
+  document.getElementById('coverTitle').value = cover.title || '';
+  document.getElementById('coverName').value = cover.authorName || '';
+  document.getElementById('coverRole').value = cover.authorRole || '';
+  updateCoverPreview();
+
+  // Restore slide toggles
+  for (const [key, val] of Object.entries(included || {})) {
+    const toggleEl = document.getElementById(`toggle-${key}`);
+    if (!toggleEl) continue;
+    const checkbox = toggleEl.querySelector('input[type=checkbox]');
+    checkbox.checked = val;
+    toggleEl.classList.toggle('on', val);
+    toggleEl.classList.toggle('excluded', !val);
+    const tabEl = document.querySelectorAll('.tab')[TAB_MAP[key]];
+    if (tabEl) tabEl.classList.toggle('excluded', !val);
+  }
+
+  // Restore segments and partner cards: clear then recreate
+  for (const slideKey of ['ph', 'cbi-t', 'cbi', 'bps']) {
+    const nsId = NS_MAP[slideKey];
+    document.getElementById(nsId).innerHTML = '';
+    const segContainer = document.getElementById(`segments-${slideKey}`);
+    if (segContainer) segContainer.innerHTML = '';
+
+    const savedSegs = slides?.[slideKey];
+    if (Array.isArray(savedSegs)) {
+      // New segment-array format
+      savedSegs.forEach(seg => createSegment(slideKey, seg.name || '', seg.partners || []));
+    } else if (savedSegs && typeof savedSegs === 'object') {
+      // Legacy format: { containerId: [partners] } — migrate gracefully
+      const legacySegNames = {
+        'ph-collection':'Collection Signals','ph-telco':'Telco Score','ph-sme':'SME / D2C',
+        'cbi-t-partners':'Telco Partners','cbi-income':'Income Prediction',
+        'cbi-debtor':'Debtor Insight','cbi-sme':'SME Bureau',
+        'bps-phone':'Phone Number Tenure Check','bps-address':'Address Verification (Direct to Telco)',
+        'bps-credit':'Composite Credit Score (Payment Gateway)','bps-income':'Income Validation',
+      };
+      for (const [cid, partners] of Object.entries(savedSegs)) {
+        if (!Array.isArray(partners) || !partners.length) continue;
+        createSegment(slideKey, legacySegNames[cid] || cid, partners);
+      }
+    } else {
+      // Nothing saved — rebuild defaults
+      (SLIDE_DEFS[slideKey] || []).forEach(seg => createSegment(slideKey, seg.name, seg.partners));
+    }
+  }
+
+  closeHistory();
+  showToast('State restored!');
+}
+
+// ─── EXPORT / MODAL ───────────────────────────────────────────────────────────
+let currentExportText = '';
+
+function openExport(type) {
+  const data = collectData();
+  document.getElementById('modalTitle').textContent = type === 'json' ? '💾 JSON Export' : '🚀 Claude Prompt';
+  document.getElementById('modalDesc').textContent = type === 'json'
+    ? 'Save this to resume editing or attach to Claude.'
+    : 'Copy this prompt into Claude, or click Generate Deck to build it automatically.';
+  currentExportText = type === 'json' ? JSON.stringify(data, null, 2) : buildPrompt(data);
+  document.getElementById('exportText').value = currentExportText;
+  // Show Generate Deck only for prompt mode
+  document.getElementById('generateArea').style.display = type === 'prompt' ? 'flex' : 'none';
+  document.getElementById('generateStatus').textContent = '';
+  document.getElementById('generateStatus').className = 'generate-status';
+  document.getElementById('exportModal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('exportModal').classList.remove('open'); }
+async function copyExport() {
+  // Auto-save to history only when copying the Claude prompt
+  const isPrompt = document.getElementById('modalTitle').textContent.includes('Claude');
+  await navigator.clipboard.writeText(currentExportText);
+  if (isPrompt) {
+    showToast('Saving…');
+    await saveToHistory(collectData());
+    showToast('Copied & saved!');
+  } else {
+    showToast('Copied!');
+  }
+}
+document.getElementById('exportModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── GENERATE DECK ────────────────────────────────────────────────────────────
+const EDGE_URL = `${SB_URL}/functions/v1/generate-deck`;
+
+async function generateDeck() {
+  const btn = document.getElementById('generateBtn');
+  const status = document.getElementById('generateStatus');
+
+  const setStatus = (state, msg) => {
+    btn.disabled = state === 'loading';
+    btn.innerHTML = state === 'loading' ? '<span class="spinner">⏳</span> Generating…' : '⚡ Generate Deck';
+    status.textContent = msg;
+    status.className = `generate-status ${state}`;
+  };
+
+  setStatus('loading', 'Sending to Claude…');
+
+  try {
+    const res = await fetch(EDGE_URL, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ prompt: currentExportText })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+
+    const deckJson = await res.json();
+    if (deckJson.error) throw new Error(deckJson.error);
+
+    setStatus('loading', 'Building PowerPoint…');
+    const data = collectData();
+    await buildPptx(deckJson, data.cover);
+    setStatus('success', '✓ Deck downloaded!');
+    setTimeout(() => setStatus('idle', ''), 3500);
+
+  } catch (err) {
+    setStatus('error', `✗ ${err.message}`);
+    setTimeout(() => setStatus('idle', ''), 5000);
+  }
+}
+
+// ─── PPTXGENJS DECK BUILDER ───────────────────────────────────────────────────
+// Reference-matched colour palette (no # prefix for pptxgenjs)
+const PC = {
+  NAVY:    '1A1F5E',   // dark navy — cover bg, header bar, BPS product col
+  LIGHT:   'F5F6FA',   // light slide background
+  WHITE:   'FFFFFF',
+  CARD_BD: 'DDE3EE',   // partner card border
+  DARK:    '1A2340',   // dark body text
+  MUTED:   '718096',   // prev / muted text
+  GREEN:   '2E7D5E',   // update colour
+  PH:    '5B6ABF',     // PH segment header
+  CBI_T: '5B6ABF',     // CBI Telco segment header
+  CBI:   '7C5CBF',     // CBI segment header
+  BPS:   '2E7D5E',     // BPS segment header (matches GREEN)
+};
+const SLIDE_COLOR = { ph: PC.PH, 'cbi-t': PC.CBI_T, cbi: PC.CBI, bps: PC.BPS };
+
+async function buildPptx(deckJson, cover) {
+  const pptx = new PptxGenJS();
+  // Define a true 16:9 layout at 10"×5.625" — all coordinates below match this canvas
+  pptx.defineLayout({ name: 'CUSTOM_16x9', width: 10, height: 5.625 });
+  pptx.layout = 'CUSTOM_16x9';
+
+  const dateLabel = `${cover.month || ''} ${cover.year || ''}`.trim();
+  addCoverSlide(pptx, cover);
+  for (const slide of (deckJson.slides || [])) {
+    slide.date = slide.date || dateLabel;
+    addContentSlide(pptx, slide);
+  }
+
+  const month = cover.month || 'Update';
+  const year  = cover.year  || new Date().getFullYear();
+  await pptx.writeFile({ fileName: `DataPartnership_${month}_${year}.pptx` });
+}
+
+function addCoverSlide(pptx, cover) {
+  const s = pptx.addSlide();
+  s.background = { color: PC.NAVY };
+
+  // ── Decorative circles (match reference) ──
+  // Large circle top-right
+  s.addShape(pptx.ShapeType.ellipse, {
+    x: 5.5, y: -1.2, w: 4.5, h: 4.5,
+    line: { color: '3D4A8A', width: 1.5 }, fill: { type: 'none' }
+  });
+  // Smaller circle bottom-right
+  s.addShape(pptx.ShapeType.ellipse, {
+    x: 7.2, y: 2.9, w: 2.8, h: 2.8,
+    line: { color: '3D4A8A', width: 1.2 }, fill: { type: 'none' }
+  });
+  // Inner filled circle (dark, inside large circle)
+  s.addShape(pptx.ShapeType.ellipse, {
+    x: 5.8, y: -0.85, w: 3.9, h: 3.9,
+    fill: { color: '22296A' }, line: { color: '22296A', width: 0 }
+  });
+
+  // ── Company label (spaced caps) ──
+  s.addText((cover.company || 'ADVANCE.AI').split('').join(String.fromCharCode(8201)), {
+    x: 0.45, y: 1.2, w: 5, h: 0.28,
+    fontSize: 10, bold: true, color: PC.WHITE, charSpacing: 3
+  });
+
+  // ── Main title ──
+  const titleLine1 = cover.title || 'Data Partnership';
+  const titleLine2 = `${cover.month || ''} Strategy Review`;
+  s.addText(`${titleLine1}\n${titleLine2}`, {
+    x: 0.45, y: 1.58, w: 5.5, h: 1.3,
+    fontSize: 28, bold: true, color: PC.WHITE, lineSpacingMultiple: 1.1
+  });
+
+  // ── Divider line ──
+  s.addShape(pptx.ShapeType.rect, { x: 0.45, y: 3.05, w: 3.5, h: 0.04, fill: { color: '4A5490' } });
+
+  // ── Updated as of ──
+  s.addText(`Updated as of: ${cover.month || ''} ${cover.year || ''}`, {
+    x: 0.45, y: 3.22, w: 5, h: 0.26,
+    fontSize: 10, color: 'A0AAD0', italic: false
+  });
+
+  // ── Shared by / Author ──
+  s.addText('Shared by', {
+    x: 0.45, y: 3.72, w: 5, h: 0.22,
+    fontSize: 9, color: 'A0AAD0'
+  });
+  s.addText(cover.authorName || 'James Teh', {
+    x: 0.45, y: 3.95, w: 5, h: 0.32,
+    fontSize: 12, bold: true, color: PC.WHITE
+  });
+  s.addText(cover.authorRole || 'Senior Manager, Regional Data Partnerships', {
+    x: 0.45, y: 4.3, w: 5.5, h: 0.26,
+    fontSize: 9.5, color: 'A0AAD0'
+  });
+
+  // ── Confidential footer ──
+  s.addText('Confidential — Internal Use Only', {
+    x: 0, y: 5.35, w: 9.8, h: 0.22, align: 'right',
+    fontSize: 8, color: '6070A0'
+  });
+}
+
+function addContentSlide(pptx, slideData) {
+  const s = pptx.addSlide();
+  // Light background for entire slide
+  s.background = { color: PC.LIGHT };
+
+  const color     = SLIDE_COLOR[slideData.id] || PC.PH;
+  const segments  = slideData.segments || [];
+  const nextSteps = slideData.nextSteps || [];
+
+  // Layout constants (10" × 5.625")
+  const W        = 10;
+  const HEADER_H = 0.65;
+  const NS_Y     = 4.6;    // next steps strip start
+  const CONTENT_Y = HEADER_H + 0.12;
+  const CONTENT_H = NS_Y - CONTENT_Y;
+  const PAD      = 0.13;
+  const SEG_H    = 0.3;    // segment pill height
+  const GAP      = 0.08;   // gap between segment pill and cards
+
+  // ── Header bar (dark navy) ──
+  s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: W, h: HEADER_H, fill: { color: PC.NAVY } });
+  s.addText(slideData.title || '', {
+    x: 0.3, y: 0, w: 7.5, h: HEADER_H, valign: 'middle',
+    fontSize: 13, bold: true, color: PC.WHITE
+  });
+  // Date top-right
+  const dateStr = slideData.date || '';
+  if (dateStr) s.addText(dateStr, {
+    x: 7.8, y: 0, w: 2.0, h: HEADER_H, valign: 'middle', align: 'right',
+    fontSize: 10, color: 'A0AACC'
+  });
+
+  // ── Segment columns ──
+  const nCols = Math.max(segments.length, 1);
+  const colW  = W / nCols;
+
+  segments.forEach((seg, si) => {
+    const cx = si * colW;
+
+    // Segment header pill (filled, rounded)
+    s.addShape(pptx.ShapeType.roundRect, {
+      x: cx + PAD, y: CONTENT_Y, w: colW - PAD * 2, h: SEG_H,
+      fill: { color }, line: { color, width: 0 }, rectRadius: 0.04
+    });
+    s.addText(seg.name || '', {
+      x: cx + PAD, y: CONTENT_Y, w: colW - PAD * 2, h: SEG_H, align: 'center', valign: 'middle',
+      fontSize: 9, bold: true, color: PC.WHITE
+    });
+
+    // Partner cards below pill
+    const partners = seg.partners || [];
+    const cardAreaH = CONTENT_H - SEG_H - GAP - PAD;
+    const cardH     = Math.min(cardAreaH / Math.max(partners.length, 1), 1.4);
+    let py = CONTENT_Y + SEG_H + GAP;
+
+    partners.forEach(p => {
+      const cardInnerH = cardH - 0.06;
+      // Card background (white, rounded border)
+      s.addShape(pptx.ShapeType.roundRect, {
+        x: cx + PAD, y: py, w: colW - PAD * 2, h: cardInnerH,
+        fill: { color: PC.WHITE }, line: { color: PC.CARD_BD, width: 0.75 }, rectRadius: 0.06
+      });
+
+      // Partner name
+      s.addText(p.name || '', {
+        x: cx + PAD + 0.08, y: py + 0.05, w: colW - PAD * 2 - 0.16, h: 0.2,
+        fontSize: 8.5, bold: true, color: PC.DARK, valign: 'middle'
+      });
+
+      // Prev line
+      const prevH = Math.max((cardInnerH - 0.25 - 0.05) * 0.45, 0.22);
+      s.addText([
+        { text: 'Prev: ', options: { bold: true, color: PC.MUTED } },
+        { text: p.prev || '—', options: { color: PC.MUTED } }
+      ], {
+        x: cx + PAD + 0.08, y: py + 0.26, w: colW - PAD * 2 - 0.16, h: prevH,
+        fontSize: 7.5, wrap: true, valign: 'top'
+      });
+
+      // Update line
+      const updY = py + 0.26 + prevH + 0.02;
+      const updH = cardInnerH - 0.26 - prevH - 0.1;
+      if (updH > 0.1) s.addText([
+        { text: 'Update: ', options: { bold: true, color: PC.GREEN } },
+        { text: p.update || '—', options: { color: PC.DARK } }
+      ], {
+        x: cx + PAD + 0.08, y: updY, w: colW - PAD * 2 - 0.16, h: updH,
+        fontSize: 7.5, wrap: true, valign: 'top'
+      });
+
+      py += cardH;
+    });
+  });
+
+  // ── Next Steps ──
+  const NS_PAD = 0.18;
+  // Dark pill label
+  s.addShape(pptx.ShapeType.roundRect, {
+    x: NS_PAD, y: NS_Y + 0.05, w: 0.82, h: 0.23,
+    fill: { color: PC.NAVY }, line: { color: PC.NAVY, width: 0 }, rectRadius: 0.03
+  });
+  s.addText('Next Steps', {
+    x: NS_PAD, y: NS_Y + 0.05, w: 0.82, h: 0.23, align: 'center', valign: 'middle',
+    fontSize: 6.5, bold: true, color: PC.WHITE
+  });
+
+  // Chips in 3-column grid
+  const chipW = (W - NS_PAD * 2) / 3 - 0.06;
+  const chipH = 0.22;
+  const chipGap = 0.05;
+  nextSteps.forEach((ns, i) => {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const cx = NS_PAD + col * (chipW + chipGap);
+    const cy = NS_Y + 0.32 + row * (chipH + chipGap);
+    s.addShape(pptx.ShapeType.roundRect, {
+      x: cx, y: cy, w: chipW, h: chipH,
+      fill: { color: PC.WHITE }, line: { color: PC.CARD_BD, width: 0.5 }, rectRadius: 0.03
+    });
+    s.addText(ns, {
+      x: cx + 0.06, y: cy, w: chipW - 0.12, h: chipH, valign: 'middle',
+      fontSize: 7.5, color: PC.DARK, wrap: false
+    });
+  });
+}
+</script>
+</body>
+</html>
